@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Privacy Policy — Setlist Metronome. No data is collected; all content stays on your device. Official text in English." />
+  <title>Privacy Policy | Setlist Metronome</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --text: #e8eef4;
+      --muted: #8b9cb3;
+      --accent: #3d9cf5;
+      --border: #2a3544;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-size: 1.0625rem;
+      line-height: 1.65;
+      color: var(--text);
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(61, 156, 245, 0.12), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 50%, rgba(61, 156, 245, 0.06), transparent);
+    }
+    .wrap {
+      max-width: 42rem;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+    }
+    .lang-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .lang-bar label {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      margin: 0;
+    }
+    .lang-switch {
+      display: flex;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+    .lang-switch button {
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .lang-switch button:hover {
+      color: var(--text);
+      border-color: var(--muted);
+    }
+    .lang-switch button[aria-pressed="true"] {
+      background: var(--surface);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .lang-switch .official {
+      font-size: 0.7rem;
+      font-weight: 600;
+      opacity: 0.85;
+    }
+    [data-lang-panel] { display: none; }
+    [data-lang-panel].active { display: block; }
+    header {
+      margin-bottom: 2.5rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 {
+      font-size: clamp(1.75rem, 4vw, 2.25rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.5rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+    .updated {
+      color: var(--muted);
+      font-size: 0.9375rem;
+      margin: 0;
+    }
+    .official-note {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      background: rgba(61, 156, 245, 0.08);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .official-note[hidden] { display: none; }
+    h2 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin: 2rem 0 0.75rem;
+      color: var(--text);
+    }
+    p, li { color: var(--muted); margin: 0 0 1rem; }
+    ul { padding-left: 1.25rem; margin: 0 0 1rem; }
+    li { margin-bottom: 0.5rem; }
+    .highlight {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .highlight p { margin: 0; color: var(--text); font-weight: 500; }
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="lang-bar">
+      <label id="lang-label">Language</label>
+      <div class="lang-switch" role="group" aria-labelledby="lang-label">
+        <button type="button" data-set-lang="en" aria-pressed="true">English <span class="official">(official)</span></button>
+        <button type="button" data-set-lang="pt" aria-pressed="false">Português</button>
+        <button type="button" data-set-lang="es" aria-pressed="false">Español</button>
+      </div>
+    </div>
+
+    <!-- English (official) -->
+    <article data-lang-panel="en" class="active" lang="en">
+      <header>
+        <span class="badge">Privacy Policy</span>
+        <h1>Setlist Metronome</h1>
+        <p class="updated">Last updated: March 15, 2026</p>
+      </header>
+      <div class="highlight">
+        <p>This application does not collect, store, or transmit personal data. Everything you create or configure stays only on your device.</p>
+      </div>
+      <h2>1. Data we do not collect</h2>
+      <p>Setlist Metronome does not require sign-up, does not use user accounts, and does not send information to our servers. We do not collect:</p>
+      <ul>
+        <li>Name, email, phone number, or any personal identifier;</li>
+        <li>Location data;</li>
+        <li>Analytics, advertising, or usage tracking;</li>
+        <li>Content of your setlists, tempos, or preferences outside your device.</li>
+      </ul>
+      <h2>2. Where your data stays</h2>
+      <p>All content generated in the app (e.g. lists and settings) is stored <strong>locally</strong> on your device, according to your operating system. We have no access to that information.</p>
+      <h2>3. Third-party services</h2>
+      <p>The app does not integrate analytics, ads, or social features that collect data on our behalf. If this changes, this page will be updated before a new version is published.</p>
+      <h2>4. Children</h2>
+      <p>Because we do not collect data, use of the app by minors does not involve processing of personal information by the developer.</p>
+      <h2>5. Changes</h2>
+      <p>We may update this policy to reflect changes to the app. The date at the top shows the latest version.</p>
+      <h2>6. Contact</h2>
+      <p>For privacy questions, contact us via the project repository on GitHub or the email listed on the app store.</p>
+      <footer>
+        <p>Setlist Metronome — 100% on-device content.</p>
+      </footer>
+    </article>
+
+    <!-- Portuguese (translation) -->
+    <article data-lang-panel="pt" lang="pt-BR">
+      <header>
+        <span class="badge">Política de Privacidade</span>
+        <h1>Setlist Metronome</h1>
+        <p class="updated">Última atualização: 15 de março de 2026</p>
+      </header>
+      <p class="official-note">Esta página em português é uma tradução para sua conveniência. <strong>A versão em inglês é a única com efeito legal</strong> (idioma oficial).</p>
+      <div class="highlight">
+        <p>Este aplicativo não coleta, armazena nem transmite dados pessoais. Tudo o que você cria ou configura fica apenas no seu dispositivo.</p>
+      </div>
+      <h2>1. Dados que não coletamos</h2>
+      <p>O Setlist Metronome não solicita cadastro, não usa contas de usuário e não envia informações para servidores nossos. Não coletamos:</p>
+      <ul>
+        <li>Nome, e-mail, telefone ou qualquer identificador pessoal;</li>
+        <li>Dados de localização;</li>
+        <li>Informações de uso analíticas ou de publicidade;</li>
+        <li>Conteúdo das suas setlists, tempos ou preferências fora do seu aparelho.</li>
+      </ul>
+      <h2>2. Onde ficam os seus dados</h2>
+      <p>Todo o conteúdo gerado no app (por exemplo, listas e configurações) é armazenado <strong>localmente</strong> no seu dispositivo, de acordo com o sistema operacional. Nós não temos acesso a essas informações.</p>
+      <h2>3. Serviços de terceiros</h2>
+      <p>O app não integra ferramentas de analytics, anúncios ou redes sociais que coletem dados em nosso nome. Se isso mudar no futuro, esta página será atualizada antes da nova versão ser publicada.</p>
+      <h2>4. Crianças</h2>
+      <p>Como não coletamos dados, o uso do app por menores não envolve tratamento de informações pessoais por parte do desenvolvedor.</p>
+      <h2>5. Alterações</h2>
+      <p>Podemos revisar esta política para refletir mudanças no app. A data no topo da página indica a versão mais recente.</p>
+      <h2>6. Contato</h2>
+      <p>Para dúvidas sobre privacidade, entre em contato pelo repositório do projeto no GitHub ou pelo e-mail indicado na loja de aplicativos.</p>
+      <footer>
+        <p>Setlist Metronome — conteúdo 100% local no seu dispositivo.</p>
+      </footer>
+    </article>
+
+    <!-- Spanish (translation) -->
+    <article data-lang-panel="es" lang="es">
+      <header>
+        <span class="badge">Política de privacidad</span>
+        <h1>Setlist Metronome</h1>
+        <p class="updated">Última actualización: 15 de marzo de 2026</p>
+      </header>
+      <p class="official-note">Esta página en español es una traducción para su comodidad. <strong>La versión en inglés es la única con efecto legal</strong> (idioma oficial).</p>
+      <div class="highlight">
+        <p>Esta aplicación no recopila, almacena ni transmite datos personales. Todo lo que creas o configures permanece solo en tu dispositivo.</p>
+      </div>
+      <h2>1. Datos que no recopilamos</h2>
+      <p>Setlist Metronome no requiere registro, no usa cuentas de usuario y no envía información a nuestros servidores. No recopilamos:</p>
+      <ul>
+        <li>Nombre, correo, teléfono ni ningún identificador personal;</li>
+        <li>Datos de ubicación;</li>
+        <li>Analíticas, publicidad o seguimiento de uso;</li>
+        <li>Contenido de tus listas, tempos o preferencias fuera de tu dispositivo.</li>
+      </ul>
+      <h2>2. Dónde permanecen tus datos</h2>
+      <p>Todo el contenido generado en la app (p. ej. listas y ajustes) se guarda <strong>localmente</strong> en tu dispositivo, según tu sistema operativo. No tenemos acceso a esa información.</p>
+      <h2>3. Servicios de terceros</h2>
+      <p>La app no integra analíticas, anuncios ni redes sociales que recopilen datos en nuestro nombre. Si esto cambia, esta página se actualizará antes de publicar una nueva versión.</p>
+      <h2>4. Menores</h2>
+      <p>Al no recopilar datos, el uso de la app por menores no implica tratamiento de datos personales por parte del desarrollador.</p>
+      <h2>5. Cambios</h2>
+      <p>Podemos actualizar esta política para reflejar cambios en la app. La fecha en la parte superior indica la versión más reciente.</p>
+      <h2>6. Contacto</h2>
+      <p>Para consultas de privacidad, contáctanos por el repositorio del proyecto en GitHub o el correo indicado en la tienda de aplicaciones.</p>
+      <footer>
+        <p>Setlist Metronome — contenido 100 % local en tu dispositivo.</p>
+      </footer>
+    </article>
+  </div>
+
+  <script>
+    (function () {
+      var LABELS = {
+        en: "Language",
+        pt: "Idioma",
+        es: "Idioma"
+      };
+      var TITLES = {
+        en: "Privacy Policy | Setlist Metronome",
+        pt: "Política de Privacidade | Setlist Metronome",
+        es: "Política de privacidad | Setlist Metronome"
+      };
+      var HASH = { en: "en", pt: "pt", es: "es" };
+
+      function validLang(x) {
+        return x === "en" || x === "pt" || x === "es" ? x : null;
+      }
+
+      function getLang() {
+        var h = (location.hash || "").replace(/^#/, "").toLowerCase();
+        if (validLang(h)) return h;
+        try {
+          var s = localStorage.getItem("setlist-privacy-lang");
+          if (validLang(s)) return s;
+        } catch (e) {}
+        var nav = (navigator.language || "").toLowerCase();
+        if (nav.indexOf("pt") === 0) return "pt";
+        if (nav.indexOf("es") === 0) return "es";
+        return "en";
+      }
+
+      function setLang(lang) {
+        if (!validLang(lang)) lang = "en";
+        document.documentElement.lang = lang === "pt" ? "pt-BR" : lang === "es" ? "es" : "en";
+        document.title = TITLES[lang];
+        var label = document.getElementById("lang-label");
+        if (label) label.textContent = LABELS[lang];
+
+        document.querySelectorAll("[data-lang-panel]").forEach(function (el) {
+          el.classList.toggle("active", el.getAttribute("data-lang-panel") === lang);
+        });
+        document.querySelectorAll("[data-set-lang]").forEach(function (btn) {
+          var on = btn.getAttribute("data-set-lang") === lang;
+          btn.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+        try {
+          localStorage.setItem("setlist-privacy-lang", lang);
+        } catch (e) {}
+        if (history.replaceState) {
+          history.replaceState(null, "", "#" + HASH[lang]);
+        } else {
+          location.hash = HASH[lang];
+        }
+      }
+
+      var initial = getLang();
+      setLang(initial);
+
+      document.querySelectorAll("[data-set-lang]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          setLang(btn.getAttribute("data-set-lang"));
+        });
+      });
+
+      window.addEventListener("hashchange", function () {
+        var h = validLang((location.hash || "").replace(/^#/, "").toLowerCase());
+        if (h) setLang(h);
+      });
+    })();
+  </script>
+</body>
+</html>
