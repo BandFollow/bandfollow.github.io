@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Editor de Setlist | Setlist Metronome</title>
+  <title>Setlist Editor | Setlist Metronome</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -63,7 +63,8 @@
     }
     .row:last-child { margin-bottom: 0; }
     .row-2 { grid-template-columns: 1fr 1fr; }
-    @media (max-width: 640px) { .row-2 { grid-template-columns: 1fr; } }
+    .row-3 { grid-template-columns: 1fr 1fr 1fr; }
+    @media (max-width: 640px) { .row-2 { grid-template-columns: 1fr; } .row-3 { grid-template-columns: 1fr; } }
     label {
       display: block;
       font-size: 0.8125rem;
@@ -152,6 +153,28 @@
     table .col-bpm { width: 90px; }
     table .col-time { width: 90px; }
     table .col-key { width: 100px; }
+    table .col-actions { width: 1%; white-space: nowrap; padding-left: 0.5rem; }
+    .drag-handle {
+      cursor: grab;
+      padding: 0.35rem 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .drag-handle:active { cursor: grabbing; }
+    tr.dragging { opacity: 0.5; }
+    tr.drop-target { background: rgba(61, 156, 245, 0.12); }
+    .btn-icon {
+      padding: 0.35rem 0.5rem;
+      font-size: 0.875rem;
+      min-width: 2rem;
+      margin: 0 0.1rem;
+    }
     .btn {
       font-family: inherit;
       font-size: 0.9375rem;
@@ -186,71 +209,126 @@
       margin-top: 0.75rem;
     }
     .download-hint code { font-size: 0.75rem; background: var(--surface2); padding: 0.15rem 0.4rem; border-radius: 4px; }
+    .page-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-header h1 { margin: 0; }
+    .lang-select {
+      font-family: inherit;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      padding: 0.45rem 0.75rem;
+      padding-right: 2rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='%238b9cb3'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.6rem center;
+    }
+    .lang-select:hover { border-color: var(--muted); }
+    .lang-select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(61, 156, 245, 0.2);
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      border: 0;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Editor de Setlist</h1>
+    <header class="page-header">
+      <h1 data-i18n="title">Setlist Editor</h1>
+      <div class="lang-wrap">
+        <label for="lang-select" id="lang-label" class="sr-only">Language</label>
+        <select id="lang-select" class="lang-select" aria-labelledby="lang-label">
+          <option value="en">🇬🇧 English</option>
+          <option value="pt">🇧🇷 Português</option>
+          <option value="es">🇪🇸 Español</option>
+        </select>
+      </div>
+    </header>
 
     <div class="section">
-      <h2>Setlist</h2>
+      <h2 data-i18n="sectionSetlist">Setlist</h2>
       <div class="row row-2">
         <div>
-          <label for="setlist-name">Nome da setlist</label>
-          <input type="text" id="setlist-name" placeholder="Ex: Gospel Celebrations 2026" />
+          <label for="setlist-name" data-i18n="setlistName">Setlist name</label>
+          <input type="text" id="setlist-name" data-i18n-placeholder="placeholderSetlistName" placeholder="e.g. Gospel Celebrations 2026" />
         </div>
         <div>
-          <label for="setlist-artist">Artista</label>
-          <input type="text" id="setlist-artist" placeholder="Ex: Elvis E" />
+          <label for="setlist-artist" data-i18n="artist">Artist</label>
+          <input type="text" id="setlist-artist" data-i18n-placeholder="placeholderArtist" placeholder="e.g. Elvis E" />
         </div>
       </div>
       <div class="row row-2">
         <div>
-          <label for="setlist-date">Data</label>
-          <input type="date" id="setlist-date" />
+          <label for="setlist-datetime-start" data-i18n="startDateTime">Start date & time</label>
+          <input type="datetime-local" id="setlist-datetime-start" />
         </div>
         <div>
-          <label for="setlist-time">Hora</label>
-          <input type="time" id="setlist-time" value="19:00" />
+          <label for="setlist-datetime-end" data-i18n="endDateTime">End date & time</label>
+          <input type="datetime-local" id="setlist-datetime-end" />
         </div>
       </div>
     </div>
 
     <div class="section">
-      <h2>Localização</h2>
+      <h2 data-i18n="sectionLocation">Location</h2>
       <div class="row">
         <div>
-          <label for="location-address">Endereço / nome do local</label>
+          <label for="location-address" data-i18n="addressLabel">Address / venue name</label>
           <div class="location-search">
-            <input type="text" id="location-address" placeholder="Ex: Igreja Central, São Paulo" />
-            <button type="button" class="btn btn-primary" id="btn-go-map">Ir no mapa</button>
+            <input type="text" id="location-address" data-i18n-placeholder="placeholderAddress" placeholder="e.g. Central Church, São Paulo" />
+            <button type="button" class="btn btn-primary" id="btn-go-map" data-i18n="goOnMap">Go on map</button>
           </div>
           <p class="map-status" id="map-status" aria-live="polite"></p>
         </div>
       </div>
       <div id="map"></div>
-      <p class="map-note">Digite o endereço e clique em &quot;Ir no mapa&quot; para centralizar. Você também pode clicar no mapa ou arrastar o marcador para ajustar.</p>
+      <p class="map-note" data-i18n="mapNote">Type an address and click &quot;Go on map&quot; to center. You can also click on the map or drag the marker to adjust.</p>
     </div>
 
     <div class="section">
-      <h2>Músicas</h2>
+      <h2 data-i18n="sectionSongs">Songs</h2>
       <div class="row row-2">
         <div>
-          <label for="song-count">Quantidade de músicas</label>
+          <label for="song-count" data-i18n="songCount">Number of songs</label>
           <input type="number" id="song-count" min="1" max="99" value="5" />
         </div>
-        <div style="align-self: end;">
-          <button type="button" class="btn btn-secondary" id="btn-apply-count">Aplicar</button>
+        <div class="song-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: flex-end;">
+          <button type="button" class="btn btn-secondary" id="btn-apply-count" data-i18n="apply">Apply</button>
+          <button type="button" class="btn btn-secondary" id="btn-add-song" data-i18n="addSong">Add song</button>
         </div>
       </div>
       <div class="songs-table-wrap">
         <table id="songs-table">
           <thead>
             <tr>
-              <th class="col-name">Nome da música</th>
+              <th class="col-name" data-i18n="colSongName">Song name</th>
               <th class="col-bpm">BPM</th>
-              <th class="col-time">Compasso</th>
+              <th class="col-time" data-i18n="colTimeSig">Time sig.</th>
               <th class="col-key">Key</th>
+              <th class="col-actions" data-i18n="colActions">Actions</th>
             </tr>
           </thead>
           <tbody id="songs-tbody"></tbody>
@@ -259,8 +337,11 @@
     </div>
 
     <div class="section">
-      <button type="button" class="btn btn-primary" id="btn-download">Gerar arquivo .setlist</button>
-      <p class="download-hint">Será baixado um arquivo no formato <code>NomeDaSetlist_Ano.setlist</code> (ex: <code>Gospel_Celebrations_2026.setlist</code>). Você pode salvar em qualquer pasta, por exemplo em Downloads.</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;">
+        <button type="button" class="btn btn-primary" id="btn-download" data-i18n="downloadBtn">Generate .setlist file</button>
+        <button type="button" class="btn btn-secondary" id="btn-new-setlist" data-i18n="btnNewSetlist">New setlist</button>
+      </div>
+      <p class="download-hint" data-i18n="downloadHint">A file will be downloaded as <code>SetlistName_Year.setlist</code> (e.g. <code>Gospel_Celebrations_2026.setlist</code>). You can save it to any folder, e.g. Downloads.</p>
     </div>
   </div>
 
@@ -270,54 +351,329 @@
       var COMPASSO_OPTIONS = ["2/4", "3/4", "4/4", "6/8", "12/8"];
       var KEY_OPTIONS = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B", "Cm", "C#m", "Dm", "Ebm", "Em", "Fm", "F#m", "Gm", "G#m", "Am", "Bbm", "Bm"];
 
+      var T = {
+        en: {
+          title: "Setlist Editor",
+          sectionSetlist: "Setlist",
+          setlistName: "Setlist name",
+          placeholderSetlistName: "e.g. Gospel Celebrations 2026",
+          artist: "Artist",
+          placeholderArtist: "e.g. Elvis E",
+          startDateTime: "Start date & time",
+          endDateTime: "End date & time",
+          sectionLocation: "Location",
+          addressLabel: "Address / venue name",
+          placeholderAddress: "e.g. Central Church, São Paulo",
+          goOnMap: "Go on map",
+          mapNote: "Type an address and click \"Go on map\" to center. You can also click on the map or drag the marker to adjust.",
+          sectionSongs: "Songs",
+          songCount: "Number of songs",
+          apply: "Apply",
+          addSong: "Add song",
+          colSongName: "Song name",
+          colTimeSig: "Time sig.",
+          downloadBtn: "Generate .setlist file",
+          downloadHint: "A file will be downloaded as SetlistName_Year.setlist (e.g. Gospel_Celebrations_2026.setlist). You can save it to any folder, e.g. Downloads.",
+          langLabel: "Language",
+          mapErrorNoAddress: "Enter an address or venue name.",
+          mapLoading: "Searching…",
+          mapNotFound: "Location not found. Try another address.",
+          mapErrorNetwork: "Error searching. Check your connection and try again.",
+          placeholderSongName: "Song name",
+          colActions: "Actions",
+          btnDragReorder: "Drag to reorder",
+          btnDelete: "Delete",
+          confirmDeleteSong: "Delete this song?",
+          btnNewSetlist: "New setlist",
+          confirmNewSetlist: "Start a new setlist? All current data will be cleared."
+        },
+        pt: {
+          title: "Editor de Setlist",
+          sectionSetlist: "Setlist",
+          setlistName: "Nome da setlist",
+          placeholderSetlistName: "Ex: Gospel Celebrations 2026",
+          artist: "Artista",
+          placeholderArtist: "Ex: Elvis E",
+          startDateTime: "Data e hora de início",
+          endDateTime: "Data e hora de fim",
+          sectionLocation: "Localização",
+          addressLabel: "Endereço / nome do local",
+          placeholderAddress: "Ex: Igreja Central, São Paulo",
+          goOnMap: "Ir no mapa",
+          mapNote: "Digite o endereço e clique em \"Ir no mapa\" para centralizar. Você também pode clicar no mapa ou arrastar o marcador para ajustar.",
+          sectionSongs: "Músicas",
+          songCount: "Quantidade de músicas",
+          apply: "Aplicar",
+          addSong: "Adicionar música",
+          colSongName: "Nome da música",
+          colTimeSig: "Compasso",
+          downloadBtn: "Gerar arquivo .setlist",
+          downloadHint: "Será baixado um arquivo no formato NomeDaSetlist_Ano.setlist (ex: Gospel_Celebrations_2026.setlist). Você pode salvar em qualquer pasta, por exemplo em Downloads.",
+          langLabel: "Idioma",
+          mapErrorNoAddress: "Digite um endereço ou nome do local.",
+          mapLoading: "Buscando…",
+          mapNotFound: "Local não encontrado. Tente outro endereço.",
+          mapErrorNetwork: "Erro ao buscar. Verifique a conexão e tente de novo.",
+          placeholderSongName: "Nome da música",
+          colActions: "Ações",
+          btnDragReorder: "Arraste para reordenar",
+          btnDelete: "Excluir",
+          confirmDeleteSong: "Excluir esta música?",
+          btnNewSetlist: "Novo setlist",
+          confirmNewSetlist: "Criar um novo setlist? Todos os dados atuais serão apagados."
+        },
+        es: {
+          title: "Editor de setlist",
+          sectionSetlist: "Setlist",
+          setlistName: "Nombre de la setlist",
+          placeholderSetlistName: "Ej: Gospel Celebrations 2026",
+          artist: "Artista",
+          placeholderArtist: "Ej: Elvis E",
+          startDateTime: "Fecha y hora de inicio",
+          endDateTime: "Fecha y hora de fin",
+          sectionLocation: "Ubicación",
+          addressLabel: "Dirección / nombre del lugar",
+          placeholderAddress: "Ej: Iglesia Central, São Paulo",
+          goOnMap: "Ir al mapa",
+          mapNote: "Escribe una dirección y haz clic en \"Ir al mapa\" para centrar. También puedes hacer clic en el mapa o arrastrar el marcador para ajustar.",
+          sectionSongs: "Canciones",
+          songCount: "Cantidad de canciones",
+          apply: "Aplicar",
+          addSong: "Añadir canción",
+          colSongName: "Nombre de la canción",
+          colTimeSig: "Compás",
+          downloadBtn: "Generar archivo .setlist",
+          downloadHint: "Se descargará un archivo con el formato NombreSetlist_Año.setlist (ej: Gospel_Celebrations_2026.setlist). Puedes guardarlo en cualquier carpeta, por ejemplo en Descargas.",
+          langLabel: "Idioma",
+          mapErrorNoAddress: "Escribe una dirección o nombre del lugar.",
+          mapLoading: "Buscando…",
+          mapNotFound: "Ubicación no encontrada. Prueba otra dirección.",
+          mapErrorNetwork: "Error al buscar. Comprueba la conexión e inténtalo de nuevo.",
+          placeholderSongName: "Nombre de la canción",
+          colActions: "Acciones",
+          btnDragReorder: "Arrastra para reordenar",
+          btnDelete: "Eliminar",
+          confirmDeleteSong: "¿Eliminar esta canción?",
+          btnNewSetlist: "Nueva setlist",
+          confirmNewSetlist: "¿Empezar una nueva setlist? Se borrarán todos los datos actuales."
+        }
+      };
+
+      var currentLang = "en";
+      var DRAFT_KEY = "setlist-editor-draft";
+      var saveDraftTimer = null;
+
+      function collectDraft() {
+        var latEl = document.getElementById("location-lat");
+        var lngEl = document.getElementById("location-lng");
+        return {
+          lang: currentLang,
+          setlistName: (document.getElementById("setlist-name") && document.getElementById("setlist-name").value) || "",
+          artist: (document.getElementById("setlist-artist") && document.getElementById("setlist-artist").value) || "",
+          datetimeStart: (document.getElementById("setlist-datetime-start") && document.getElementById("setlist-datetime-start").value) || "",
+          datetimeEnd: (document.getElementById("setlist-datetime-end") && document.getElementById("setlist-datetime-end").value) || "",
+          venue: (document.getElementById("location-address") && document.getElementById("location-address").value) || "",
+          venueLat: latEl && latEl.value ? parseFloat(latEl.value) : null,
+          venueLng: lngEl && lngEl.value ? parseFloat(lngEl.value) : null,
+          songs: getSongsData()
+        };
+      }
+
+      function setDraft() {
+        try {
+          var d = collectDraft();
+          localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
+        } catch (e) {}
+      }
+
+      function scheduleSaveDraft() {
+        if (saveDraftTimer) clearTimeout(saveDraftTimer);
+        saveDraftTimer = setTimeout(setDraft, 400);
+      }
+
+      function getDraft() {
+        try {
+          var s = localStorage.getItem(DRAFT_KEY);
+          return s ? JSON.parse(s) : null;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function restoreDraft(draft) {
+        if (!draft) return;
+        if (draft.lang && (draft.lang === "en" || draft.lang === "pt" || draft.lang === "es")) {
+          applyLang(draft.lang);
+        }
+        var nameEl = document.getElementById("setlist-name");
+        if (nameEl && draft.setlistName != null) nameEl.value = draft.setlistName;
+        var artistEl = document.getElementById("setlist-artist");
+        if (artistEl && draft.artist != null) artistEl.value = draft.artist;
+        var startEl = document.getElementById("setlist-datetime-start");
+        if (startEl && draft.datetimeStart != null) startEl.value = draft.datetimeStart;
+        var endEl = document.getElementById("setlist-datetime-end");
+        if (endEl && draft.datetimeEnd != null) endEl.value = draft.datetimeEnd;
+        var venueEl = document.getElementById("location-address");
+        if (venueEl && draft.venue != null) venueEl.value = draft.venue;
+        var latEl = document.getElementById("location-lat");
+        var lngEl = document.getElementById("location-lng");
+        if (latEl && draft.venueLat != null) latEl.value = String(draft.venueLat);
+        if (lngEl && draft.venueLng != null) lngEl.value = String(draft.venueLng);
+        if (map && marker && draft.venueLat != null && draft.venueLng != null) {
+          map.setView([draft.venueLat, draft.venueLng], map.getZoom() || 13);
+          marker.setLatLng([draft.venueLat, draft.venueLng]);
+        }
+        var tbody = document.getElementById("songs-tbody");
+        var countInput = document.getElementById("song-count");
+        if (tbody && Array.isArray(draft.songs)) {
+          tbody.innerHTML = "";
+          if (draft.songs.length === 0) {
+            if (countInput) countInput.value = "0";
+            return;
+          }
+          draft.songs.forEach(function (song) {
+            var tr = buildSongRow(tbody.children.length);
+            tbody.appendChild(tr);
+            var nameInput = tr.querySelector("[data-song-name]");
+            if (nameInput) nameInput.value = song.name || "";
+            var bpmInput = tr.querySelector("[data-song-bpm]");
+            if (bpmInput) bpmInput.value = String(song.bpm != null ? song.bpm : 120);
+            var timeSelect = tr.querySelector("[data-song-time]");
+            if (timeSelect) {
+              var ts = (song.timeSignatureNumerator != null && song.timeSignatureDenominator != null)
+                ? song.timeSignatureNumerator + "/" + song.timeSignatureDenominator
+                : (song.timeSignature || "4/4");
+              timeSelect.value = ts;
+            }
+            var keySelect = tr.querySelector("[data-song-key]");
+            if (keySelect && song.key) keySelect.value = song.key;
+          });
+          if (countInput) countInput.value = draft.songs.length;
+        }
+      }
+
+      function t(key) {
+        return (T[currentLang] && T[currentLang][key]) || (T.en[key]) || key;
+      }
+
+      function applyLang(lang) {
+        currentLang = lang;
+        var docLang = lang === "pt" ? "pt-BR" : lang === "es" ? "es" : "en";
+        document.documentElement.lang = docLang;
+        document.title = t("title") + " | Setlist Metronome";
+        var label = document.getElementById("lang-label");
+        if (label) label.textContent = t("langLabel");
+        document.querySelectorAll("[data-i18n]").forEach(function (el) {
+          var key = el.getAttribute("data-i18n");
+          if (key) el.textContent = t(key);
+        });
+        document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) {
+          var key = el.getAttribute("data-i18n-placeholder");
+          if (key) el.placeholder = t(key);
+        });
+        var langSelect = document.getElementById("lang-select");
+        if (langSelect) langSelect.value = currentLang;
+        var songNameInputs = document.querySelectorAll("#songs-tbody [data-song-name]");
+        songNameInputs.forEach(function (input) {
+          input.placeholder = t("placeholderSongName");
+        });
+        try {
+          localStorage.setItem("setlist-editor-lang", currentLang);
+        } catch (e) {}
+      }
+
       var map = null;
       var marker = null;
       var defaultLat = -23.5505;
       var defaultLng = -46.6333;
 
-      function initMap() {
-        map = L.map("map").setView([defaultLat, defaultLng], 13);
+      function initMap(initialLat, initialLng) {
+        var lat = initialLat != null ? initialLat : defaultLat;
+        var lng = initialLng != null ? initialLng : defaultLng;
+        map = L.map("map").setView([lat, lng], 13);
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: "&copy; OpenStreetMap",
           maxZoom: 19
         }).addTo(map);
-        marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
+        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
         marker.on("dragend", function () {
           var c = marker.getLatLng();
-          document.getElementById("location-lat").value = c.lat.toFixed(6);
-          document.getElementById("location-lng").value = c.lng.toFixed(6);
+          var latEl = document.getElementById("location-lat");
+          var lngEl = document.getElementById("location-lng");
+          if (latEl) latEl.value = c.lat.toFixed(6);
+          if (lngEl) lngEl.value = c.lng.toFixed(6);
         });
         map.on("click", function (e) {
           marker.setLatLng(e.latlng);
-          document.getElementById("location-lat").value = e.latlng.lat.toFixed(6);
-          document.getElementById("location-lng").value = e.latlng.lng.toFixed(6);
+          var latEl = document.getElementById("location-lat");
+          var lngEl = document.getElementById("location-lng");
+          if (latEl) latEl.value = e.latlng.lat.toFixed(6);
+          if (lngEl) lngEl.value = e.latlng.lng.toFixed(6);
         });
         var latInput = document.createElement("input");
         latInput.type = "hidden";
         latInput.id = "location-lat";
-        latInput.value = defaultLat;
+        latInput.value = lat;
         var lngInput = document.createElement("input");
         lngInput.type = "hidden";
         lngInput.id = "location-lng";
-        lngInput.value = defaultLng;
+        lngInput.value = lng;
         document.getElementById("map").parentNode.appendChild(latInput);
         document.getElementById("map").parentNode.appendChild(lngInput);
       }
 
-      function setMapStatus(msg, type) {
+      function tryInitialLocation(callback) {
+        function done(lat, lng) {
+          if (typeof callback === "function") callback(lat, lng);
+        }
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            function (pos) {
+              done(pos.coords.latitude, pos.coords.longitude);
+            },
+            function () {
+              fetch("https://ip-api.com/json/?fields=lat,lon")
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                  if (data && typeof data.lat === "number" && typeof data.lon === "number") {
+                    done(data.lat, data.lon);
+                  } else {
+                    done(defaultLat, defaultLng);
+                  }
+                })
+                .catch(function () { done(defaultLat, defaultLng); });
+            },
+            { timeout: 6000, maximumAge: 300000 }
+          );
+        } else {
+          fetch("https://ip-api.com/json/?fields=lat,lon")
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+              if (data && typeof data.lat === "number" && typeof data.lon === "number") {
+                done(data.lat, data.lon);
+              } else {
+                done(defaultLat, defaultLng);
+              }
+            })
+            .catch(function () { done(defaultLat, defaultLng); });
+        }
+      }
+
+      function setMapStatus(msgOrKey, type) {
         var el = document.getElementById("map-status");
         if (!el) return;
-        el.textContent = msg || "";
+        var msg = (msgOrKey && T[currentLang] && T[currentLang][msgOrKey]) ? T[currentLang][msgOrKey] : (msgOrKey || "");
+        el.textContent = msg;
         el.className = "map-status" + (type ? " " + type : "");
       }
 
       function goToAddress() {
         var address = (document.getElementById("location-address").value || "").trim();
         if (!address) {
-          setMapStatus("Digite um endereço ou nome do local.", "error");
+          setMapStatus("mapErrorNoAddress", "error");
           return;
         }
-        setMapStatus("Buscando…", "loading");
+        setMapStatus("mapLoading", "loading");
         var url = "https://nominatim.openstreetmap.org/search?q=" + encodeURIComponent(address) + "&format=json&limit=1";
         fetch(url, {
           headers: {
@@ -329,7 +685,7 @@
           .then(function (res) { return res.json(); })
           .then(function (data) {
             if (!data || data.length === 0) {
-              setMapStatus("Local não encontrado. Tente outro endereço.", "error");
+              setMapStatus("mapNotFound", "error");
               return;
             }
             var lat = parseFloat(data[0].lat);
@@ -343,14 +699,18 @@
             setMapStatus("");
           })
           .catch(function () {
-            setMapStatus("Erro ao buscar. Verifique a conexão e tente de novo.", "error");
+            setMapStatus("mapErrorNetwork", "error");
           });
       }
 
       function buildSongRow(index) {
+        var place = t("placeholderSongName");
+        var dragTitle = (t("btnDragReorder") || "Drag to reorder").replace(/"/g, "&quot;");
+        var delTitle = (t("btnDelete") || "").replace(/"/g, "&quot;");
         var tr = document.createElement("tr");
+        tr.draggable = false;
         tr.innerHTML =
-          '<td class="col-name"><input type="text" data-song-name placeholder="Nome da música" /></td>' +
+          '<td class="col-name"><input type="text" data-song-name placeholder="' + (place.replace(/"/g, "&quot;")) + '" /></td>' +
           '<td class="col-bpm"><input type="number" data-song-bpm min="1" max="300" value="120" placeholder="120" /></td>' +
           '<td class="col-time"><select data-song-time>' +
           COMPASSO_OPTIONS.map(function (c) {
@@ -361,8 +721,88 @@
           KEY_OPTIONS.map(function (k) {
             return '<option value="' + k + '">' + k + '</option>';
           }).join("") +
-          '</select></td>';
+          '</select></td>' +
+          '<td class="col-actions">' +
+          '<span class="drag-handle" role="button" tabindex="0" title="' + dragTitle + '" aria-label="' + dragTitle + '">⋮⋮</span>' +
+          '<button type="button" class="btn btn-secondary btn-icon" data-action="delete" title="' + delTitle + '" aria-label="' + delTitle + '">✕</button>' +
+          '</td>';
         return tr;
+      }
+
+      function updateSongCount() {
+        var tbody = document.getElementById("songs-tbody");
+        if (!tbody) return;
+        var countInput = document.getElementById("song-count");
+        if (countInput) countInput.value = tbody.querySelectorAll("tr").length;
+      }
+
+      var dragSourceRow = null;
+
+      function onSongActionClick(e) {
+        var btn = e.target.closest("button[data-action]");
+        if (!btn || btn.getAttribute("data-action") !== "delete") return;
+        var tr = btn.closest("tr");
+        if (!tr) return;
+        if (!confirm(t("confirmDeleteSong"))) return;
+        tr.remove();
+        updateSongCount();
+        scheduleSaveDraft();
+      }
+
+      function setupDragAndDrop() {
+        var tbody = document.getElementById("songs-tbody");
+        if (!tbody) return;
+        tbody.addEventListener("mousedown", function (e) {
+          if (e.target.closest(".drag-handle")) {
+            var tr = e.target.closest("tr");
+            if (tr) tr.draggable = true;
+          }
+        });
+        tbody.addEventListener("dragstart", function (e) {
+          var tr = e.target.closest("tr");
+          if (!tr) return;
+          dragSourceRow = tr;
+          tr.classList.add("dragging");
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", "");
+        });
+        tbody.addEventListener("dragend", function (e) {
+          tbody.querySelectorAll("tr").forEach(function (r) {
+            r.classList.remove("dragging");
+            r.draggable = false;
+          });
+          tbody.querySelectorAll("tr").forEach(function (r) { r.classList.remove("drop-target"); });
+          dragSourceRow = null;
+        });
+        tbody.addEventListener("dragover", function (e) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+          var tr = e.target.closest("tr");
+          if (!tr || tr === dragSourceRow) return;
+          tbody.querySelectorAll("tr").forEach(function (r) { r.classList.remove("drop-target"); });
+          tr.classList.add("drop-target");
+        });
+        tbody.addEventListener("dragleave", function (e) {
+          if (!e.target.closest("tr")) return;
+          var tr = e.target.closest("tr");
+          if (e.relatedTarget && !tbody.contains(e.relatedTarget)) tr.classList.remove("drop-target");
+        });
+        tbody.addEventListener("drop", function (e) {
+          e.preventDefault();
+          tbody.querySelectorAll("tr").forEach(function (r) { r.classList.remove("drop-target"); });
+          var targetTr = e.target.closest("tr");
+          if (!dragSourceRow || !targetTr || dragSourceRow === targetTr) return;
+          var srcIdx = Array.prototype.indexOf.call(tbody.children, dragSourceRow);
+          var tgtIdx = Array.prototype.indexOf.call(tbody.children, targetTr);
+          if (srcIdx < tgtIdx) {
+            tbody.insertBefore(dragSourceRow, targetTr.nextElementSibling);
+          } else {
+            tbody.insertBefore(dragSourceRow, targetTr);
+          }
+          updateSongCount();
+          scheduleSaveDraft();
+          dragSourceRow = null;
+        });
       }
 
       function applySongCount() {
@@ -381,6 +821,39 @@
             tbody.removeChild(tbody.lastChild);
           }
         }
+        updateSongCount();
+        scheduleSaveDraft();
+      }
+
+      function addSong() {
+        var tbody = document.getElementById("songs-tbody");
+        var countInput = document.getElementById("song-count");
+        var current = tbody.querySelectorAll("tr").length;
+        var next = current + 1;
+        if (next > 99) return;
+        tbody.appendChild(buildSongRow(current));
+        countInput.value = next;
+        updateSongCount();
+        scheduleSaveDraft();
+      }
+
+      function resetSetlist() {
+        if (!confirm(t("confirmNewSetlist"))) return;
+        var nameEl = document.getElementById("setlist-name");
+        if (nameEl) nameEl.value = "";
+        var artistEl = document.getElementById("setlist-artist");
+        if (artistEl) artistEl.value = "";
+        var startEl = document.getElementById("setlist-datetime-start");
+        if (startEl) startEl.value = "";
+        var endEl = document.getElementById("setlist-datetime-end");
+        if (endEl) endEl.value = "";
+        var venueEl = document.getElementById("location-address");
+        if (venueEl) venueEl.value = "";
+        var tbody = document.getElementById("songs-tbody");
+        if (tbody) tbody.innerHTML = "";
+        var countInput = document.getElementById("song-count");
+        if (countInput) countInput.value = "0";
+        setDraft();
       }
 
       function uuid() {
@@ -436,14 +909,15 @@
       function buildSetlistContent() {
         var name = (document.getElementById("setlist-name").value || "Setlist").trim();
         var artist = (document.getElementById("setlist-artist").value || "").trim();
-        var date = document.getElementById("setlist-date").value || "";
-        var time = document.getElementById("setlist-time").value || "19:00";
+        var datetimeStart = (document.getElementById("setlist-datetime-start") && document.getElementById("setlist-datetime-start").value) || "";
+        var datetimeEnd = (document.getElementById("setlist-datetime-end") && document.getElementById("setlist-datetime-end").value) || "";
         var venue = (document.getElementById("location-address").value || "").trim();
         var latEl = document.getElementById("location-lat");
         var lngEl = document.getElementById("location-lng");
         var venueLat = latEl && !isNaN(parseFloat(latEl.value)) ? parseFloat(latEl.value) : null;
         var venueLng = lngEl && !isNaN(parseFloat(lngEl.value)) ? parseFloat(lngEl.value) : null;
-        var dateISO = date && time ? date + "T" + time + ":00Z" : null;
+        var dateISO = datetimeStart ? (datetimeStart.length === 16 ? datetimeStart + ":00Z" : datetimeStart.slice(0, 19) + "Z") : null;
+        var dateEndISO = datetimeEnd ? (datetimeEnd.length === 16 ? datetimeEnd + ":00Z" : datetimeEnd.slice(0, 19) + "Z") : null;
 
         var rawSongs = getSongsData();
         var songs = rawSongs.map(function (s) {
@@ -469,6 +943,7 @@
           venueLat: venueLat != null ? venueLat : undefined,
           venueLng: venueLng != null ? venueLng : undefined
         };
+        if (dateEndISO) setlistItem.dateEnd = dateEndISO;
         if (setlistItem.venueLat == null) delete setlistItem.venueLat;
         if (setlistItem.venueLng == null) delete setlistItem.venueLng;
 
@@ -483,8 +958,8 @@
 
       function suggestFilename() {
         var name = (document.getElementById("setlist-name").value || "Setlist").trim();
-        var date = document.getElementById("setlist-date").value || "";
-        var year = date ? date.slice(0, 4) : new Date().getFullYear().toString();
+        var datetimeStart = document.getElementById("setlist-datetime-start") && document.getElementById("setlist-datetime-start").value;
+        var year = (datetimeStart && datetimeStart.length >= 4) ? datetimeStart.slice(0, 4) : new Date().getFullYear().toString();
         var base = name.replace(/\s+/g, "_").replace(/[^\w\u00C0-\u024F\-]/gi, "") || "Setlist";
         return base + "_" + year + ".setlist";
       }
@@ -500,9 +975,12 @@
         URL.revokeObjectURL(a.href);
       }
 
+      document.getElementById("songs-tbody").addEventListener("click", onSongActionClick);
       document.getElementById("btn-apply-count").addEventListener("click", applySongCount);
       document.getElementById("song-count").addEventListener("change", applySongCount);
+      document.getElementById("btn-add-song").addEventListener("click", addSong);
       document.getElementById("btn-download").addEventListener("click", downloadSetlist);
+      document.getElementById("btn-new-setlist").addEventListener("click", resetSetlist);
 
       document.getElementById("btn-go-map").addEventListener("click", goToAddress);
       document.getElementById("location-address").addEventListener("keydown", function (e) {
@@ -512,8 +990,38 @@
         }
       });
 
-      initMap();
-      applySongCount();
+      document.getElementById("lang-select").addEventListener("change", function () {
+        applyLang(this.value);
+      });
+
+      var savedLang = (function () {
+        try {
+          var s = localStorage.getItem("setlist-editor-lang");
+          if (s === "en" || s === "pt" || s === "es") return s;
+        } catch (e) {}
+        var nav = (navigator.language || "").toLowerCase();
+        if (nav.indexOf("pt") === 0) return "pt";
+        if (nav.indexOf("es") === 0) return "es";
+        return "en";
+      })();
+      applyLang(savedLang);
+
+      tryInitialLocation(function (lat, lng) {
+        initMap(lat, lng);
+        var draft = getDraft();
+        if (draft) {
+          restoreDraft(draft);
+        } else {
+          applySongCount();
+        }
+        setupDragAndDrop();
+      });
+
+      document.querySelector(".wrap").addEventListener("input", scheduleSaveDraft);
+      document.querySelector(".wrap").addEventListener("change", scheduleSaveDraft);
+      window.addEventListener("beforeunload", function () {
+        setDraft();
+      });
     })();
   </script>
 </body>
