@@ -42,6 +42,43 @@ Links diretos por idioma: `.../setlist-metronome/privacy#pt`, `.../setlist-metro
 - **Nome do app / data**: edite os três blocos em `index.html` e em `setlist-metronome/privacy/index.html` (EN, PT, ES).
 - **Contato**: ajuste o parágrafo “Contact” / “Contato” / “Contacto” em cada idioma.
 
+## Importar playlist (BPM e key)
+
+No **setlist-editor.html**, na seção **Músicas**, use o campo de link da playlist e **“Adicionar músicas da playlist”** — as faixas são **acrescentadas** ao fim da tabela (não substituem as existentes). A página **playlist-importer.html** continua disponível como alternativa isolada.
+
+- **Spotify**: lista de faixas e **BPM/key** vêm da API do Spotify (Audio Features), tudo **gratuito**.
+- **YouTube**: só a lista de vídeos (títulos) vem da API; **BPM e key** vêm como padrão (120, C). Edite manualmente na tabela ou use uma playlist do Spotify para preenchimento automático.
+
+### Rodar o backend localmente
+
+1. Entre na pasta do servidor e instale as dependências:
+   ```bash
+   cd server
+   npm install
+   ```
+
+2. Copie o arquivo de exemplo e preencha as variáveis:
+   ```bash
+   cp .env.example .env
+   ```
+   Edite o `.env` com:
+- **Spotify**: `SPOTIFY_CLIENT_ID` e `SPOTIFY_CLIENT_SECRET` (crie um app em [Spotify for Developers](https://developer.spotify.com/dashboard)).
+   - **YouTube**: `YOUTUBE_API_KEY` (ative a YouTube Data API v3 no [Google Cloud Console](https://console.cloud.google.com/) — cota gratuita).
+
+3. Inicie o servidor:
+   ```bash
+   npm start
+   ```
+
+4. Abra no navegador: **http://localhost:3000/setlist-editor.html** (import na seção Músicas) ou **http://localhost:3000/playlist-importer.html**.  
+   Se abrir o HTML sem o servidor (ex.: GitHub Pages), preencha **URL da API** com `http://localhost:3000` (ou a URL do backend em produção).
+
+### Deploy do backend
+
+Para usar a importação em produção, faça deploy do servidor (ex.: Railway, Render, Fly.io) e defina as variáveis de ambiente. No editor, no campo **URL da API (backend)**, informe a URL base (ex.: `https://seu-app.railway.app`).
+
+---
+
 ## Observação
 
 Se o nome do app não for “Setlist Metronome”, altere todas as menções no `index.html` para o nome correto.

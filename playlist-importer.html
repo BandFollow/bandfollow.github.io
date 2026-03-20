@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Importar playlist | Setlist Metronome</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #232f42;
+      --text: #e8eef4;
+      --muted: #8b9cb3;
+      --accent: #3d9cf5;
+      --border: #2a3544;
+      --green: #34c759;
+      --amber: #ffb020;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-size: 1rem;
+      line-height: 1.5;
+      color: var(--text);
+      background: var(--bg);
+      background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(61, 156, 245, 0.08), transparent);
+    }
+    .wrap {
+      max-width: 56rem;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3rem;
+    }
+    .page-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-header h1 { margin: 0; font-size: 1.5rem; font-weight: 700; }
+    .nav-links { display: flex; gap: 1rem; align-items: center; }
+    .nav-links a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    .nav-links a:hover { text-decoration: underline; }
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .section h2 {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin: 0 0 1rem;
+    }
+    label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+    input, select {
+      width: 100%;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+    }
+    input::placeholder { color: var(--muted); opacity: 0.8; }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(61, 156, 245, 0.2);
+    }
+    .row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; margin-bottom: 1rem; }
+    .row .field { flex: 1; min-width: 200px; }
+    .btn {
+      font-family: inherit;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover:not(:disabled) { opacity: 0.9; }
+    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover:not(:disabled) { opacity: 0.9; }
+    .status {
+      font-size: 0.875rem;
+      margin-top: 0.75rem;
+      min-height: 1.5em;
+    }
+    .status.loading { color: var(--accent); }
+    .status.error { color: #ff6b6b; }
+    .status.success { color: var(--green); }
+    .hint { font-size: 0.8125rem; color: var(--muted); margin-top: 0.35rem; }
+    .songs-table-wrap { overflow-x: auto; margin-top: 1rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9375rem;
+    }
+    th {
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      padding: 0.5rem 0.6rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    th:first-child { border-radius: 8px 0 0 0; padding-left: 0.75rem; }
+    th:last-child { border-radius: 0 8px 0 0; }
+    td {
+      padding: 0.4rem 0.6rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    td:first-child { padding-left: 0.75rem; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    table input, table select {
+      padding: 0.45rem 0.5rem;
+      font-size: 0.875rem;
+      margin: 0;
+    }
+    .col-name { min-width: 180px; }
+    .col-artist { min-width: 120px; }
+    .col-bpm { width: 90px; }
+    .col-key { width: 100px; }
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.9375rem;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-top: 1.5rem; }
+    .lang-select {
+      font-family: inherit;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      padding: 0.45rem 0.75rem;
+      padding-right: 2rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='%238b9cb3'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.6rem center;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="page-header">
+      <h1 data-i18n="title">Importar playlist</h1>
+      <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <a href="setlist-editor.html" data-i18n="linkSetlistEditor">Editor de setlist</a>
+        <label for="lang-select" id="lang-label" class="sr-only">Idioma</label>
+        <select id="lang-select" class="lang-select" aria-labelledby="lang-label">
+          <option value="en">English</option>
+          <option value="pt">Português</option>
+          <option value="es">Español</option>
+        </select>
+      </div>
+    </header>
+
+    <div class="section">
+      <h2 data-i18n="sectionPlaylist">Playlist</h2>
+      <div class="row">
+        <div class="field" style="flex: 2; min-width: 260px;">
+          <label for="playlist-url" data-i18n="playlistUrl">Link da playlist (YouTube ou Spotify)</label>
+          <input type="url" id="playlist-url" placeholder="https://open.spotify.com/playlist/... ou https://www.youtube.com/playlist?list=..." />
+        </div>
+        <div style="flex-shrink: 0;">
+          <button type="button" class="btn btn-primary" id="btn-import" data-i18n="btnImport">Buscar BPM e key</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field" style="flex: 1; min-width: 200px;">
+          <label for="api-base" data-i18n="apiBaseUrl">URL da API (backend)</label>
+          <input type="url" id="api-base" placeholder="http://localhost:3000" />
+          <p class="hint" data-i18n="apiBaseHint">Deixe em branco se estiver usando o servidor padrão. Para rodar o backend local: <code>node server/index.js</code></p>
+        </div>
+      </div>
+      <p class="status" id="status" aria-live="polite"></p>
+    </div>
+
+    <div class="section">
+      <h2 data-i18n="sectionResults">Resultado</h2>
+      <div class="songs-table-wrap">
+        <table id="songs-table">
+          <thead>
+            <tr>
+              <th class="col-name" data-i18n="colSongName">Música</th>
+              <th class="col-artist" data-i18n="colArtist">Artista</th>
+              <th class="col-bpm">BPM</th>
+              <th class="col-key" data-i18n="colKey">Key</th>
+            </tr>
+          </thead>
+          <tbody id="songs-tbody"></tbody>
+        </table>
+      </div>
+      <div id="empty-state" class="empty-state" data-i18n="emptyState">
+        Cole o link de uma playlist do YouTube ou Spotify e clique em &quot;Buscar BPM e key&quot;.
+      </div>
+      <p class="hint" id="youtube-default-hint" style="display: none; margin-top: 0.75rem;" data-i18n="youtubeDefaultHint"></p>
+      <div id="results-actions" class="actions" style="display: none;">
+        <button type="button" class="btn btn-primary" id="btn-download" data-i18n="downloadSetlist">Baixar .setlist</button>
+        <button type="button" class="btn btn-secondary" id="btn-append-editor" data-i18n="appendToEditor">Anexar ao editor (sem apagar músicas)</button>
+        <button type="button" class="btn btn-secondary" id="btn-copy-json" data-i18n="copyJson">Copiar JSON</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var KEY_OPTIONS = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B", "Cm", "C#m", "Dm", "Ebm", "Em", "Fm", "F#m", "Gm", "G#m", "Am", "Bbm", "Bm"];
+
+      var T = {
+        en: {
+          title: "Import playlist",
+          linkSetlistEditor: "Setlist editor",
+          sectionPlaylist: "Playlist",
+          playlistUrl: "Playlist link (YouTube or Spotify)",
+          btnImport: "Fetch BPM & key",
+          apiBaseUrl: "API base URL (backend)",
+          apiBaseHint: "Leave blank to use default server. To run backend locally: node server/index.js",
+          sectionResults: "Results",
+          colSongName: "Song",
+          colArtist: "Artist",
+          colKey: "Key",
+          emptyState: "Paste a YouTube or Spotify playlist link and click \"Fetch BPM & key\".",
+          downloadSetlist: "Download .setlist",
+          copyJson: "Copy JSON",
+          statusLoading: "Loading playlist…",
+          statusFetchingBpm: "Fetching BPM and key…",
+          statusSuccess: "Done.",
+          statusError: "Error",
+          statusInvalidUrl: "Invalid playlist URL. Use a YouTube or Spotify playlist link.",
+          statusNoTracks: "No tracks found in this playlist.",
+          youtubeDefaultHint: "YouTube playlists: BPM and key are set to default (120, C). Edit them in the table or use a Spotify playlist for automatic values.",
+          appendToEditor: "Append to setlist editor (keeps existing songs)"
+        },
+        pt: {
+          title: "Importar playlist",
+          linkSetlistEditor: "Editor de setlist",
+          sectionPlaylist: "Playlist",
+          playlistUrl: "Link da playlist (YouTube ou Spotify)",
+          btnImport: "Buscar BPM e key",
+          apiBaseUrl: "URL da API (backend)",
+          apiBaseHint: "Deixe em branco se estiver usando o servidor padrão. Para rodar o backend local: node server/index.js",
+          sectionResults: "Resultado",
+          colSongName: "Música",
+          colArtist: "Artista",
+          colKey: "Key",
+          emptyState: "Cole o link de uma playlist do YouTube ou Spotify e clique em \"Buscar BPM e key\".",
+          downloadSetlist: "Baixar .setlist",
+          copyJson: "Copiar JSON",
+          statusLoading: "Carregando playlist…",
+          statusFetchingBpm: "Buscando BPM e tonalidade…",
+          statusSuccess: "Pronto.",
+          statusError: "Erro",
+          statusInvalidUrl: "URL inválida. Use um link de playlist do YouTube ou Spotify.",
+          statusNoTracks: "Nenhuma faixa encontrada nesta playlist.",
+          youtubeDefaultHint: "Playlists do YouTube: BPM e key vêm como padrão (120, C). Ajuste na tabela ou use uma playlist do Spotify para preenchimento automático.",
+          appendToEditor: "Anexar ao editor (não apaga músicas atuais)"
+        },
+        es: {
+          title: "Importar playlist",
+          linkSetlistEditor: "Editor de setlist",
+          sectionPlaylist: "Playlist",
+          playlistUrl: "Enlace de la playlist (YouTube o Spotify)",
+          btnImport: "Obtener BPM y tonalidad",
+          apiBaseUrl: "URL de la API (backend)",
+          apiBaseHint: "Dejar en blanco para usar el servidor por defecto. Para ejecutar el backend local: node server/index.js",
+          sectionResults: "Resultado",
+          colSongName: "Canción",
+          colArtist: "Artista",
+          colKey: "Tonalidad",
+          emptyState: "Pega el enlace de una playlist de YouTube o Spotify y haz clic en \"Obtener BPM y tonalidad\".",
+          downloadSetlist: "Descargar .setlist",
+          copyJson: "Copiar JSON",
+          statusLoading: "Cargando playlist…",
+          statusFetchingBpm: "Obteniendo BPM y tonalidad…",
+          statusSuccess: "Listo.",
+          statusError: "Error",
+          statusInvalidUrl: "URL inválida. Usa un enlace de playlist de YouTube o Spotify.",
+          statusNoTracks: "No se encontraron pistas en esta playlist.",
+          youtubeDefaultHint: "Playlists de YouTube: BPM y tonalidad vienen por defecto (120, C). Edítalos en la tabla o usa una playlist de Spotify para valores automáticos.",
+          appendToEditor: "Añadir al editor (no borra las canciones actuales)"
+        }
+      };
+
+      var currentLang = "pt";
+
+      function t(key) {
+        return (T[currentLang] && T[currentLang][key]) || (T.en[key]) || key;
+      }
+
+      function applyLang(lang) {
+        currentLang = lang;
+        var docLang = lang === "pt" ? "pt-BR" : lang === "es" ? "es" : "en";
+        document.documentElement.lang = docLang;
+        document.title = t("title") + " | Setlist Metronome";
+        var label = document.getElementById("lang-label");
+        if (label) label.textContent = lang === "en" ? "Language" : lang === "pt" ? "Idioma" : "Idioma";
+        document.querySelectorAll("[data-i18n]").forEach(function (el) {
+          var key = el.getAttribute("data-i18n");
+          if (key) el.textContent = t(key);
+        });
+        var langSelect = document.getElementById("lang-select");
+        if (langSelect) langSelect.value = currentLang;
+        try { localStorage.setItem("playlist-importer-lang", currentLang); } catch (e) {}
+      }
+
+      function setStatus(msgKey, type) {
+        var el = document.getElementById("status");
+        if (!el) return;
+        el.textContent = t(msgKey);
+        el.className = "status" + (type ? " " + type : "");
+      }
+
+      function setStatusRaw(msg, type) {
+        var el = document.getElementById("status");
+        if (!el) return;
+        el.textContent = msg;
+        el.className = "status" + (type ? " " + type : "");
+      }
+
+      function getApiBase() {
+        var base = (document.getElementById("api-base").value || "").trim();
+        if (base) return base.replace(/\/$/, "");
+        return "";
+      }
+
+      function normalizeKey(str) {
+        if (!str || typeof str !== "string") return "C";
+        var s = str.trim();
+        var map = { "C major": "C", "C minor": "Cm", "C# major": "C#", "C# minor": "C#m", "Db major": "Db", "D major": "D", "D minor": "Dm", "D# major": "D#", "Eb major": "Eb", "Eb minor": "Ebm", "E major": "E", "E minor": "Em", "F major": "F", "F minor": "Fm", "F# major": "F#", "F# minor": "F#m", "Gb major": "Gb", "G major": "G", "G minor": "Gm", "G# minor": "G#m", "Ab major": "Ab", "A major": "A", "A minor": "Am", "A# major": "A#", "Bb major": "Bb", "Bb minor": "Bbm", "B major": "B", "B minor": "Bm" };
+        if (map[s]) return map[s];
+        if (KEY_OPTIONS.indexOf(s) !== -1) return s;
+        return "C";
+      }
+
+      function renderTracks(tracks) {
+        var tbody = document.getElementById("songs-tbody");
+        var emptyState = document.getElementById("empty-state");
+        var resultsActions = document.getElementById("results-actions");
+        tbody.innerHTML = "";
+        if (!tracks || tracks.length === 0) {
+          emptyState.style.display = "block";
+          resultsActions.style.display = "none";
+          var yh = document.getElementById("youtube-default-hint");
+          if (yh) yh.style.display = "none";
+          return;
+        }
+        emptyState.style.display = "none";
+        resultsActions.style.display = "flex";
+        tracks.forEach(function (track, i) {
+          var tr = document.createElement("tr");
+          var keyVal = normalizeKey(track.key || "C");
+          tr.innerHTML =
+            '<td class="col-name"><input type="text" data-song-name value="' + (escapeHtml(track.name || "")) + '" /></td>' +
+            '<td class="col-artist"><input type="text" data-song-artist value="' + (escapeHtml(track.artist || "")) + '" /></td>' +
+            '<td class="col-bpm"><input type="number" data-song-bpm min="1" max="300" value="' + (track.bpm || 120) + '" /></td>' +
+            '<td class="col-key"><select data-song-key>' +
+            KEY_OPTIONS.map(function (k) {
+              return '<option value="' + k + '"' + (k === keyVal ? " selected" : "") + '>' + k + '</option>';
+            }).join("") + '</select></td>';
+          tbody.appendChild(tr);
+        });
+      }
+
+      function escapeHtml(s) {
+        var div = document.createElement("div");
+        div.textContent = s;
+        return div.innerHTML;
+      }
+
+      function getTracksFromTable() {
+        var rows = document.querySelectorAll("#songs-tbody tr");
+        var tracks = [];
+        rows.forEach(function (tr) {
+          var nameEl = tr.querySelector("[data-song-name]");
+          var artistEl = tr.querySelector("[data-song-artist]");
+          var bpmEl = tr.querySelector("[data-song-bpm]");
+          var keyEl = tr.querySelector("[data-song-key]");
+          tracks.push({
+            name: (nameEl && nameEl.value || "").trim(),
+            artist: (artistEl && artistEl.value || "").trim(),
+            bpm: parseInt(bpmEl && bpmEl.value, 10) || 120,
+            key: (keyEl && keyEl.value) || "C"
+          });
+        });
+        return tracks;
+      }
+
+      function uuid() {
+        if (typeof crypto !== "undefined" && crypto.randomUUID) {
+          return crypto.randomUUID().toUpperCase();
+        }
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+          var r = Math.random() * 16 | 0, v = c === "x" ? r : (r & 3 | 8);
+          return v.toString(16).toUpperCase();
+        });
+      }
+
+      function parseKeySignature(keyStr) {
+        if (!keyStr || typeof keyStr !== "string") return { note: "C", accidental: "", mode: "" };
+        var key = keyStr.trim();
+        var mode = key.slice(-1) === "m" ? "m" : "";
+        if (mode) key = key.slice(0, -1);
+        var note = key.charAt(0).toUpperCase();
+        var accidental = key.length > 1 ? key.slice(1) : "";
+        if (accidental !== "b" && accidental !== "#") accidental = "";
+        return { note: note, accidental: accidental, mode: mode };
+      }
+
+      function buildSetlistJson() {
+        var tracks = getTracksFromTable();
+        var songs = tracks.map(function (s, index) {
+          var ks = parseKeySignature(s.key);
+          return {
+            bpm: s.bpm,
+            id: uuid(),
+            keySignature: { accidental: ks.accidental, mode: ks.mode, note: ks.note },
+            name: s.name || "",
+            order: index,
+            parts: [],
+            timeSignatureDenominator: 4,
+            timeSignatureNumerator: 4
+          };
+        });
+        var setlistItem = {
+          artist: "",
+          date: new Date().toISOString().slice(0, 19) + "Z",
+          id: uuid(),
+          name: "Imported Playlist",
+          songs: songs,
+          venue: ""
+        };
+        return JSON.stringify({
+          exportedAt: new Date().toISOString(),
+          setlists: [setlistItem],
+          version: 1
+        }, null, 2);
+      }
+
+      function downloadSetlist() {
+        var json = buildSetlistJson();
+        var blob = new Blob([json], { type: "application/octet-stream" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "Imported_Playlist_" + new Date().getFullYear() + ".setlist";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+
+      function copyJson() {
+        var json = buildSetlistJson();
+        navigator.clipboard.writeText(json).then(function () {
+          setStatusRaw(currentLang === "pt" ? "JSON copiado." : currentLang === "es" ? "JSON copiado." : "JSON copied.", "success");
+          setTimeout(function () { setStatus("statusSuccess", "success"); }, 2000);
+        }).catch(function () {
+          setStatusRaw("Copy failed", "error");
+        });
+      }
+
+      function importPlaylist() {
+        var url = (document.getElementById("playlist-url").value || "").trim();
+        if (!url) {
+          setStatus("statusInvalidUrl", "error");
+          return;
+        }
+        var isSpotify = /spotify\.com\/playlist\/([a-zA-Z0-9]+)/.test(url) || /open\.spotify\.com\/playlist\/([a-zA-Z0-9]+)/.test(url);
+        var isYoutube = /youtube\.com\/playlist\?list=([a-zA-Z0-9_-]+)/.test(url) || /youtu\.be\/.*\?list=([a-zA-Z0-9_-]+)/.test(url);
+        if (!isSpotify && !isYoutube) {
+          setStatus("statusInvalidUrl", "error");
+          return;
+        }
+
+        var base = getApiBase();
+        var apiUrl = base ? (base + "/api/import-playlist") : "/api/import-playlist";
+
+        setStatus("statusLoading", "loading");
+        document.getElementById("btn-import").disabled = true;
+
+        fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ playlistUrl: url })
+        })
+          .then(function (res) {
+            if (!res.ok) return res.json().then(function (err) { throw new Error(err.message || err.error || "Request failed"); });
+            return res.json();
+          })
+          .then(function (data) {
+            setStatus("statusFetchingBpm", "loading");
+            if (!data.tracks || data.tracks.length === 0) {
+              setStatus("statusNoTracks", "error");
+              renderTracks([]);
+              document.getElementById("youtube-default-hint").style.display = "none";
+              return;
+            }
+            setStatus("statusSuccess", "success");
+            renderTracks(data.tracks);
+            var yh = document.getElementById("youtube-default-hint");
+            if (yh) {
+              yh.textContent = t("youtubeDefaultHint");
+              yh.style.display = data.source === "youtube" ? "block" : "none";
+            }
+          })
+          .catch(function (err) {
+            setStatusRaw(t("statusError") + ": " + (err.message || String(err)), "error");
+            renderTracks([]);
+          })
+          .finally(function () {
+            document.getElementById("btn-import").disabled = false;
+          });
+      }
+
+      var APPEND_EDITOR_KEY = "setlist-editor-append-import";
+
+      document.getElementById("btn-import").addEventListener("click", importPlaylist);
+      document.getElementById("btn-download").addEventListener("click", downloadSetlist);
+      document.getElementById("btn-copy-json").addEventListener("click", copyJson);
+      document.getElementById("btn-append-editor").addEventListener("click", function () {
+        var tracks = getTracksFromTable();
+        if (!tracks.length) {
+          setStatus("statusNoTracks", "error");
+          return;
+        }
+        try {
+          localStorage.setItem(APPEND_EDITOR_KEY, JSON.stringify({ tracks: tracks }));
+        } catch (err) {
+          setStatusRaw(t("statusError"), "error");
+          return;
+        }
+        location.href = "setlist-editor.html";
+      });
+      document.getElementById("lang-select").addEventListener("change", function () {
+        applyLang(this.value);
+      });
+
+      var savedLang = (function () {
+        try {
+          var s = localStorage.getItem("playlist-importer-lang");
+          if (s === "en" || s === "pt" || s === "es") return s;
+        } catch (e) {}
+        var nav = (navigator.language || "").toLowerCase();
+        if (nav.indexOf("pt") === 0) return "pt";
+        if (nav.indexOf("es") === 0) return "es";
+        return "en";
+      })();
+      applyLang(savedLang);
+    })();
+  </script>
+</body>
+</html>
